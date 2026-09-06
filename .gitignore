@@ -1,0 +1,29 @@
+# Build output
+bin/
+obj/
+output/
+launcher/
+publish/
+*.user
+*.suo
+
+# IDE
+.vs/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Temporary
+*.tmp
+*.log
+*.pdb
+
+# Release assets (large binaries)
+release_assets/
+*.exe
+!src/**/*.exe
