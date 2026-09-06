@@ -1,0 +1,82 @@
+============================================================
+           APK2EXE 一键打包工具 - 使用说明
+============================================================
+
+【这是什么？】
+把 Android APK 文件打包成 Windows 可执行程序（EXE）。
+生成的 EXE 双击就能运行，首次运行会自动下载 Android 运行时到 C 盘，
+之后直接启动，多个应用共享同一个运行时，节省空间。
+
+【文件说明】
+  APK2EXE.exe              主程序（图形化打包工具）
+  launcher\                 启动器（打包时自动使用，不用管）
+  使用说明.txt              本文件
+
+【使用步骤】
+  1. 双击运行 APK2EXE.exe
+  2. 点击"浏览..."选择要打包的 APK 文件
+  3. 输入应用名称（会自动从 APK 文件名填充）
+  4. 运行时下载地址：默认已填好 WSABuilds（WSA 社区版），一般不用改
+  5. 启动命令：默认是模板，根据你用的运行时修改（见下方说明）
+  6. 选择输出目录（默认桌面）
+  7. 点击"一键生成 EXE"
+  8. 完成！输出目录里会生成一个 应用名.exe
+
+【生成的 EXE 怎么用？】
+  - 双击生成的 EXE 即可运行
+  - 首次运行会自动下载 Android 运行时到 C:\ProgramData\APK2EXE\Runtime\
+    （约 1GB，需要几分钟，取决于网速）
+  - 下载完成后自动启动应用
+  - 以后再运行（包括其他用本工具打包的应用）会直接启动，不用重新下载
+
+【关于运行时】
+  默认使用 WSABuilds（Windows Subsystem for Android 社区版）：
+  - 支持 Windows 10 和 Windows 11
+  - 需要 CPU 支持虚拟化（VT-x / AMD-V），并在 BIOS 中开启
+  - 需要启用 Windows 的"虚拟机平台"功能（首次运行可能需要管理员权限）
+  - 性能接近原生 Android
+
+  你也可以把"运行时下载地址"换成其他 Android 运行时的 ZIP 包，
+  比如雷电模拟器便携版、BlueStacks 便携版等。
+
+【关于启动命令】
+  启动命令会写入生成的 EXE 里的 start.bat，运行时自动执行。
+  默认是模板，只显示信息并暂停，你需要根据运行时修改：
+
+  变量说明：
+    %~dp0          表示当前目录（APK 解压后的目录）
+    %~dp0app.apk   APK 文件的完整路径
+
+  运行时安装在：C:\ProgramData\APK2EXE\Runtime\
+
+  示例（WSA）：
+    @echo off
+    echo 正在启动 WSA...
+    start "" "C:\ProgramData\APK2EXE\Runtime\WsaClient.exe" /launch
+    timeout /t 5 /nobreak >nul
+    adb install "%~dp0app.apk"
+    adb shell monkey -p com.example.app 1
+    pause
+
+  示例（通用模拟器）：
+    @echo off
+    start "" "C:\ProgramData\APK2EXE\Runtime\dnplayer.exe"
+    pause
+
+【注意事项】
+  1. 生成的 EXE 是控制台程序，运行时会显示黑色控制台窗口（显示下载进度等）
+  2. 首次运行需要联网下载运行时，之后可以离线使用
+  3. 运行时下载地址如果失效（版本更新），请到 https://github.com/WSABuilds/WSABuilds 获取最新地址
+  4. 不是所有 APK 都能在 WSA 上运行（部分依赖 Google 服务的应用可能有问题）
+  5. 打包商业应用请注意版权问题
+
+【技术原理】
+  生成的 EXE = 启动器（64MB，自包含 .NET 运行时）+ APK 数据包 + 尾部标记
+  启动器运行时：
+    1. 读取自身末尾的 APK 数据包
+    2. 检查 C:\ProgramData\APK2EXE\Runtime\ 是否有运行时
+    3. 没有则自动下载并解压
+    4. 解压 APK 到 %LOCALAPPDATA%\APK2EXE\Apps\应用名\
+    5. 执行 start.bat 启动应用
+
+============================================================
